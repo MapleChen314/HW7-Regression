@@ -166,16 +166,6 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             Vector of gradients.
         """
-        # grads=[]
-        # for i in range(len(y_true)):
-        #     grad=np.dot(X[i],self.W)-y_true[i]
-        #     grads.append(grad)
-        # return grads
-        # grads=[]
-        # for i in range(len(y_true)):
-        #     sample=[1]+list(X[i,:])
-        #     grad= X.T @ (np.dot(X[i,:], self.W )- y_true[i])
-        #     grads.append(grad)
         y_pred=self.make_prediction(X)
         gradient=(1/len(y_true))*(X.T @ [x-y for x,y in zip(y_pred,y_true)])
         return gradient
