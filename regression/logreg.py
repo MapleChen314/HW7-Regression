@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 # Base class for generic regressor
 # (this is already complete!)
@@ -69,10 +70,11 @@ class BaseRegressor():
                 prev_W = self.W
                 grad = self.calculate_gradient(y_train, X_train)
                 new_W = prev_W - self.lr * grad 
+                #new_W = [i-j for i,j in zip(prev_W,[self.lr * x for x in grad ])]
                 self.W = new_W
 
                 # Save parameter update size
-                update_sizes.append(np.abs(new_W - prev_W))
+                update_sizes.append(np.abs([x-y for x,y in zip(new_W,prev_W)]))
 
                 # Compute validation loss
                 val_loss = self.loss_function(y_val, self.make_prediction(X_val))
@@ -129,7 +131,9 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             The predicted labels (y_pred) for given X.
         """
-        pass
+        #y_pred=[1/(1+np.exp(-1*(np.dot(np.insert(X[i,:],0,1),self.W)))) for i in range(X.shape[0])]
+        y_pred=[1/(1+np.exp(-1*(np.dot(X[i,:],self.W)))) for i in range(X.shape[0])]
+        return y_pred
     
     def loss_function(self, y_true, y_pred) -> float:
         """
@@ -143,7 +147,12 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             The mean loss (a single number).
         """
-        pass
+        summation=0
+        for i in range(len(y_true)):
+            factor=y_true[i]*math.log(y_pred[i])+(1-y_true[i])*math.log(1-y_pred[i])
+            summation+=factor
+        loss=-1*summation/len(y_true)
+        return loss
         
     def calculate_gradient(self, y_true, X) -> np.ndarray:
         """
@@ -157,4 +166,17 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             Vector of gradients.
         """
-        pass
+        # grads=[]
+        # for i in range(len(y_true)):
+        #     grad=np.dot(X[i],self.W)-y_true[i]
+        #     grads.append(grad)
+        # return grads
+        # grads=[]
+        # for i in range(len(y_true)):
+        #     sample=[1]+list(X[i,:])
+        #     grad= X.T @ (np.dot(X[i,:], self.W )- y_true[i])
+        #     grads.append(grad)
+        y_pred=self.make_prediction(X)
+        gradient=(1/len(y_true))*(X.T @ [x-y for x,y in zip(y_pred,y_true)])
+        return gradient
+        
